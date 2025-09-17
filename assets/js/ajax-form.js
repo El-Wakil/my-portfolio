@@ -7,50 +7,50 @@ $(function () {
 	var formMessages = $('.ajax-response');
 
 	// Set up an event listener for the contact form.
-	$(form).submit(function (e) {
+    $(form).submit(function (e) {
 		// Stop the browser from submitting the form.
 		e.preventDefault();
 
 		// Serialize the form data.
 		var formData = $(form).serialize();
 
+		// Button state handling
+		var submitBtn = $(form).find('button[type="submit"], .submit-btn').first();
+		var originalBtnHtml = submitBtn.html();
+		submitBtn.prop('disabled', true).addClass('disabled').html('Sending...');
+
 		// Submit the form using AJAX.
 		$.ajax({
 			type: 'POST',
 			url: $(form).attr('action'),
-			data: formData
+			data: formData,
+			dataType: 'json'
 		})
 			.done(function (response) {
-				// Make sure that the formMessages div has the 'success' class.
-				$(formMessages).removeClass('error');
-				$(formMessages).addClass('success');
-
-				// Set the message text.
-				$(formMessages).text(response);
-
-				// Clear the form.
-				$('#contact-form input,#contact-form textarea').val('');
-				$('#contact-form select[name="budget"]').prop('selectedIndex', 0);
-				// Remove success message after 2 seconds
-				setTimeout(function () {
-					$(formMessages).empty().removeClass('success');
-				}, 5000);
-			})
-			.fail(function (data) {
-				// Make sure that the formMessages div has the 'error' class.
-				$(formMessages).removeClass('success');
-				$(formMessages).addClass('error');
-
-				// Set the message text.
-				if (data.responseText !== '') {
-					$(formMessages).text(data.responseText);
+				// Expecting JSON {status, message}
+				if (response.status === 'success') {
+					$(formMessages).removeClass('error').addClass('success').text(response.message || 'Message sent.');
+					// Clear the form.
+					$('#contact-form input,#contact-form textarea').val('');
+					$('#contact-form select[name="budget"]').prop('selectedIndex', 0);
 				} else {
-					$(formMessages).text('Oops! An error occured and your message could not be sent.');
+					$(formMessages).removeClass('success').addClass('error').text(response.message || 'Failed to send message.');
 				}
-				// Remove error message after 2 seconds
-				setTimeout(function () {
-					$(formMessages).empty().removeClass('error');
-				}, 5000);
+				setTimeout(function () { $(formMessages).empty().removeClass('success error'); }, 5000);
+			})
+			.fail(function (jqXHR) {
+				var msg = 'Oops! An error occurred and your message could not be sent.';
+				try {
+					var json = JSON.parse(jqXHR.responseText);
+					if (json.message) msg = json.message;
+				} catch (e) {
+					if (jqXHR.responseText) msg = jqXHR.responseText;
+				}
+				$(formMessages).removeClass('success').addClass('error').text(msg);
+				setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 5000);
+			})
+			.always(function () {
+				submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
 			});
 	});
 
