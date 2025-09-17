@@ -1,4 +1,18 @@
 $(function () {
+	// Diagnostics: check EmailJS availability early
+	if (!window.EMAIL_JS_CONFIG) {
+		console.warn('[Contact Form] EMAIL_JS_CONFIG not found. Form will fall back to action or show message.');
+	} else {
+		var cfg = window.EMAIL_JS_CONFIG;
+		['publicKey','serviceId','templateId'].forEach(function(k){
+			if(!cfg[k] || /YOUR_/i.test(cfg[k])) {
+				console.warn('[Contact Form] EmailJS config value for', k, 'looks like a placeholder.');
+			}
+		});
+		if (!window.emailjs) {
+			console.warn('[Contact Form] emailjs SDK not loaded yet when ajax-form.js ran. Check script order.');
+		}
+	}
 
 	// Get the form.
 	var form = $('#contact-form');
