@@ -260,7 +260,11 @@
                   <div class="contact-area">
                     <div class="leave-comments-area">
                       <div class="comments-box">
-                        <form id="contact-form" action="assets/mail.php" method="POST">
+                        <form id="contact-form" method="POST" novalidate>
+                          <!-- Honeypot field (hidden from users) -->
+                          <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+                            <label>Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+                          </div>
                           <div class="row gx-3">
                             <div class="col-md-6">
                               <div class="mb-4">
@@ -357,6 +361,9 @@
   <script src="assets/js/clipboard.min.js"></script>
   <script src="assets/js/slick.min.js"></script>
   <script src="assets/js/script.js"></script>
+  <!-- EmailJS SDK & config -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" integrity="sha384-wxW3y7E8cgR3XMY6CPhyEh7U6FsM7Fm5VqH9Llwy9oq5xqHLZp4pD0Q8GnU3DR1T" crossorigin="anonymous"></script>
+  <script src="assets/js/contact-config.js"></script>
 </body>
 
 

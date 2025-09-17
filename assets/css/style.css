@@ -2720,3 +2720,32 @@ p {
   background-color: var(--primary);
   color: var(--white);
 }
+
+/* =============================
+   Form Validation Enhancements
+============================= */
+.is-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15);
+}
+.field-error {
+  font-size: 12px;
+  color: #dc3545;
+  margin-top: 4px;
+  font-weight: 500;
+}
+.ajax-response.success {
+  color: #198754;
+}
+.ajax-response.error {
+  color: #dc3545;
+}
+
+/* Dark theme adjustments for validation */
+.dark-theme .is-invalid {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.15);
+}
+.dark-theme .field-error {
+  color: #fca5a5;
+}
