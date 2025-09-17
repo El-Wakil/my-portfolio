@@ -6,7 +6,7 @@
 
 window.EMAIL_JS_CONFIG = {
   publicKey: '7e5PFbPHWQJT6dN_N',        // EmailJS public (user) key
-  serviceId: 'service_q2e9c5o',          // EmailJS service ID
+  serviceId: 'service_ojzyjal',          // EmailJS service ID
   templateId: 'template_kyja06p',        // EmailJS template ID
   // Additional template params appended automatically (optional)
   extraParams: {
