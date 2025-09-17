@@ -96,7 +96,8 @@ $(function () {
 			var body = {
 				service_id: emailCfg.serviceId,
 				template_id: emailCfg.templateId,
-				public_key: emailCfg.publicKey,
+				public_key: emailCfg.publicKey, // EmailJS newer docs accept public_key
+				user_id: emailCfg.publicKey,     // Backward compatibility (some endpoints expect user_id)
 				template_params: payload
 			};
 			fetch(url, {
@@ -105,7 +106,20 @@ $(function () {
 				body: JSON.stringify(body)
 			})
 			.then(function(res){
-				if(!res.ok) throw new Error('Status '+res.status);
+				if(!res.ok) {
+					return res.text().then(function(t){
+						var msg = 'Status '+res.status;
+						// Try to extract structured error
+						try {
+							var j = JSON.parse(t);
+							if (j.error) msg += ' - ' + j.error;
+							if (j.message) msg += ' - ' + j.message;
+						} catch(e) {
+							if (t) msg += ' - ' + t.substring(0,180);
+						}
+						throw new Error(msg);
+					});
+				}
 				return res.text();
 			})
 			.then(function(){
