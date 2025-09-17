@@ -40,14 +40,23 @@ $(function () {
 			})
 			.fail(function (jqXHR) {
 				var msg = 'Oops! An error occurred and your message could not be sent.';
-				try {
-					var json = JSON.parse(jqXHR.responseText);
-					if (json.message) msg = json.message;
-				} catch (e) {
-					if (jqXHR.responseText) msg = jqXHR.responseText;
+				// 405 often means running on static hosting without PHP
+				if (jqXHR.status === 405) {
+					msg = 'Form backend not allowed here (405). This site is likely on static hosting without PHP. Deploy to PHP hosting or use a form service.';
+				} else if (jqXHR.status === 404) {
+					msg = 'Mail endpoint not found (404). Ensure assets/mail.php exists on the deployed server.';
+				} else {
+					try {
+						var json = JSON.parse(jqXHR.responseText);
+						if (json.message) msg = json.message;
+					} catch (e) {
+						if (jqXHR.responseText && /<[^>]+>/.test(jqXHR.responseText) === false) {
+							msg = jqXHR.responseText;
+						}
+					}
 				}
 				$(formMessages).removeClass('success').addClass('error').text(msg);
-				setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 5000);
+				setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 7000);
 			})
 			.always(function () {
 				submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
