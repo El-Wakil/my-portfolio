@@ -93,12 +93,13 @@ $(function () {
 			}
 			// REST API endpoint
 			var url = 'https://api.emailjs.com/api/v1.0/email/send';
+			// Merge extra template params if provided
+			var mergedParams = Object.assign({}, payload, (emailCfg.extraParams || {}));
 			var body = {
-				service_id: emailCfg.serviceId,
-				template_id: emailCfg.templateId,
-				public_key: emailCfg.publicKey, // EmailJS newer docs accept public_key
-				user_id: emailCfg.publicKey,     // Backward compatibility (some endpoints expect user_id)
-				template_params: payload
+				service_id: emailCfg.serviceId.trim(),
+				template_id: emailCfg.templateId.trim(),
+				user_id: emailCfg.publicKey.trim(), // EmailJS REST official key field
+				template_params: mergedParams
 			};
 			fetch(url, {
 				method: 'POST',
@@ -108,16 +109,18 @@ $(function () {
 			.then(function(res){
 				if(!res.ok) {
 					return res.text().then(function(t){
-						var msg = 'Status '+res.status;
-						// Try to extract structured error
-						try {
-							var j = JSON.parse(t);
-							if (j.error) msg += ' - ' + j.error;
-							if (j.message) msg += ' - ' + j.message;
-						} catch(e) {
-							if (t) msg += ' - ' + t.substring(0,180);
-						}
-						throw new Error(msg);
+						var display = 'Status '+res.status;
+						var structured = {};
+						try { structured = JSON.parse(t); } catch(e) {}
+						if (structured.error) display += ' - ' + structured.error;
+						if (structured.message) display += ' - ' + structured.message;
+						if (!structured.error && !structured.message && t) display += ' - ' + t.substring(0,160);
+						console.groupCollapsed('[Contact Form] EmailJS 400 Debug');
+						console.log('Response body raw:', t);
+						console.log('Parsed:', structured);
+						console.log('Sent body:', body);
+						console.groupEnd();
+						throw new Error(display);
 					});
 				}
 				return res.text();
@@ -129,12 +132,42 @@ $(function () {
 			})
 			.catch(function(err){
 				console.error('[Contact Form] EmailJS REST error:', err);
-				$(formMessages).removeClass('success').addClass('error').text('Failed to send (REST): ' + err.message);
-				setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 7000);
+				var baseMsg = 'Failed to send (REST): ' + err.message;
+				var probable = '';
+				if (/Status 400/.test(err.message)) {
+					probable = ' Possible causes: incorrect service/template ID, unverified account, or missing template variables.';
+				}
+				if (window.location.search.indexOf('debugEmail=1') !== -1) {
+					baseMsg += ' | service_id='+body.service_id+' template_id='+body.template_id;
+				}
+				var fallback = (emailCfg.fallback && emailCfg.fallback.enabled) ? emailCfg.fallback : null;
+				if (fallback && fallback.type === 'formspree' && fallback.endpoint) {
+					console.info('[Contact Form] Attempting fallback provider:', fallback.type);
+					fetch(fallback.endpoint, {
+						method: 'POST',
+						headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+						body: JSON.stringify(mergedParams)
+					}).then(function(r){
+						if(!r.ok) throw new Error('Fallback status '+r.status);
+						return r.json().catch(()=>({}));
+					}).then(function(){
+						$(formMessages).removeClass('error').addClass('success').text('Message sent successfully (fallback).');
+						$('#contact-form input,#contact-form textarea').val('');
+						setTimeout(function () { $(formMessages).empty().removeClass('success'); }, 5000);
+					}).catch(function(fErr){
+						console.error('[Contact Form] Fallback provider failed:', fErr);
+						$(formMessages).removeClass('success').addClass('error').text(baseMsg + probable + ' Fallback failed: ' + fErr.message);
+						setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 12000);
+					}).finally(function(){
+						submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
+					});
+				} else {
+					$(formMessages).removeClass('success').addClass('error').text(baseMsg + probable);
+					setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 10000);
+					submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
+				}
 			})
-			.finally(function(){
-				submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
-			});
+			.finally(function(){ /* success path already re-enables button; errors handle themselves */ });
 		}
 		function fallbackToAction() {
 			// Fallback: attempt legacy AJAX POST if action exists

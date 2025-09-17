@@ -149,6 +149,34 @@ Data shape (note: include both `public_key` and `user_id` for widest compatibili
 
 If you revert to the SDK, re-add the CDN script before `ajax-form.js` and remove the REST fetch logic.
 
+#### REST 400 Error Troubleshooting
+
+If you see: `Failed to send (REST): Status 400` check:
+
+1. `service_id` exactly matches the EmailJS service (no spaces).
+2. `template_id` is correct and active.
+3. Account email verified (unverified accounts can reject sends).
+4. Template includes all variables you pass: `name`, `email`, `subject`, `budget`, `message`.
+5. No extra required variables exist in the template that you did not supply.
+6. Try adding `?debugEmail=1` to the page URL to append IDs in the on-page error message.
+7. Open DevTools console: collapsed group `[Contact Form] EmailJS 400 Debug` shows the raw response.
+
+If after these checks it still fails, regenerate a new public key and update `contact-config.js`.
+
+### Fallback Provider (Formspree)
+
+You can enable a fallback if EmailJS fails (400/401/403/404). In `assets/js/contact-config.js` set:
+
+```js
+fallback: {
+  enabled: true,
+  type: 'formspree',
+  endpoint: 'https://formspree.io/f/yourFormID'
+}
+```
+
+The script will attempt EmailJS first; on failure it will POST JSON to Formspree. Ensure your Formspree form is configured to accept JSON (most endpoints auto-handle). The message shown to the user will indicate "(fallback)" on success via Formspree.
+
 Messages displayed in `.ajax-response` use classes:
 
 - `.success` (green text)

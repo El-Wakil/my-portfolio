@@ -5,8 +5,18 @@
 // 4. NEVER commit secret keys; only public key is used client-side.
 
 window.EMAIL_JS_CONFIG = {
-  publicKey: '7e5PFbPHWQJT6dN_N',        // e.g. 'm2_xxxxxx'
-  serviceId: 'service_q2e9c5o',        // e.g. 'service_abc123'
-  templateId: 'template_kyja06p'       // e.g. 'template_xyz789'
-  // If you add more variables, ensure they are mapped in ajax-form.js
+  publicKey: '7e5PFbPHWQJT6dN_N',        // EmailJS public (user) key
+  serviceId: 'service_q2e9c5o',          // EmailJS service ID
+  templateId: 'template_kyja06p',        // EmailJS template ID
+  // Additional template params appended automatically (optional)
+  extraParams: {
+    // reply_to: 'override@example.com',
+    // to_name: 'Mohammed',
+  },
+  // Fallback provider (optional). If EmailJS REST returns 400/401/403/404 it will try this endpoint.
+  fallback: {
+    enabled: false,
+    type: 'formspree',                   // currently only 'formspree' supported
+    endpoint: 'https://formspree.io/f/yourFormID'
+  }
 };
