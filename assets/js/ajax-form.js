@@ -83,58 +83,81 @@ $(function () {
 		};
 
 		var emailCfg = window.EMAIL_JS_CONFIG || null;
-		var canUseEmailJS = emailCfg && emailCfg.publicKey && emailCfg.serviceId && emailCfg.templateId && window.emailjs;
-
-		if (canUseEmailJS) {
-			// Initialize (idempotent)
-			try { window.emailjs.init(emailCfg.publicKey); } catch (e) { /* ignore */ }
-			window.emailjs.send(emailCfg.serviceId, emailCfg.templateId, payload)
-				.then(function () {
-					$(formMessages).removeClass('error').addClass('success').text('Message sent successfully.');
-					$('#contact-form input,#contact-form textarea').val('');
-					setTimeout(function () { $(formMessages).empty().removeClass('success'); }, 5000);
-				})
-				.catch(function (err) {
-					$(formMessages).removeClass('success').addClass('error').text('Failed to send: ' + (err && err.text ? err.text : 'Try again later.'));
-					setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 7000);
-				})
-				.finally(function () {
-					submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
-				});
-			return; // Stop here; we handled via EmailJS
-		}
-
-		// Fallback: attempt legacy AJAX POST if action exists
-		var action = $(form).attr('action');
-		if (!action) {
-			$(formMessages).removeClass('success').addClass('error').text('No email service configured. Please configure EmailJS or set a form action.');
-			submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
-			return;
-		}
-		var formData = $(form).serialize();
-		$.ajax({
-			type: 'POST',
-			url: action,
-			data: formData,
-			dataType: 'json'
-		}).done(function (response) {
-			if (response.status === 'success') {
-				$(formMessages).removeClass('error').addClass('success').text(response.message || 'Message sent.');
+		var attempts = 0;
+		function trySendWithEmailJS() {
+			var canUseEmailJS = emailCfg && emailCfg.publicKey && emailCfg.serviceId && emailCfg.templateId;
+			if (!canUseEmailJS) {
+				console.warn('[Contact Form] EmailJS REST missing config; falling back.');
+				fallbackToAction();
+				return;
+			}
+			// REST API endpoint
+			var url = 'https://api.emailjs.com/api/v1.0/email/send';
+			var body = {
+				service_id: emailCfg.serviceId,
+				template_id: emailCfg.templateId,
+				public_key: emailCfg.publicKey,
+				template_params: payload
+			};
+			fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(body)
+			})
+			.then(function(res){
+				if(!res.ok) throw new Error('Status '+res.status);
+				return res.text();
+			})
+			.then(function(){
+				$(formMessages).removeClass('error').addClass('success').text('Message sent successfully.');
 				$('#contact-form input,#contact-form textarea').val('');
-			} else {
-				$(formMessages).removeClass('success').addClass('error').text(response.message || 'Failed to send message.');
+				setTimeout(function () { $(formMessages).empty().removeClass('success'); }, 5000);
+			})
+			.catch(function(err){
+				console.error('[Contact Form] EmailJS REST error:', err);
+				$(formMessages).removeClass('success').addClass('error').text('Failed to send (REST): ' + err.message);
+				setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 7000);
+			})
+			.finally(function(){
+				submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
+			});
+		}
+		function fallbackToAction() {
+			// Fallback: attempt legacy AJAX POST if action exists
+			var action = $(form).attr('action');
+			if (!action) {
+				$(formMessages).removeClass('success').addClass('error').text('No email service configured. Please configure EmailJS or set a form action.');
+				submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
+				return;
 			}
-			setTimeout(function () { $(formMessages).empty().removeClass('success error'); }, 5000);
-		}).fail(function (jqXHR) {
-			var msg = 'Oops! An error occurred and your message could not be sent.';
-			if (jqXHR.status === 405) {
-				msg = 'Backend not allowed (405). Configure EmailJS or deploy with PHP.';
-			}
-			$(formMessages).removeClass('success').addClass('error').text(msg);
-			setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 7000);
-		}).always(function () {
-			submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
-		});
+			var formData = $(form).serialize();
+			$.ajax({
+				type: 'POST',
+				url: action,
+				data: formData,
+				dataType: 'json'
+			}).done(function (response) {
+				if (response.status === 'success') {
+					$(formMessages).removeClass('error').addClass('success').text(response.message || 'Message sent.');
+					$('#contact-form input,#contact-form textarea').val('');
+				} else {
+					$(formMessages).removeClass('success').addClass('error').text(response.message || 'Failed to send message.');
+				}
+				setTimeout(function () { $(formMessages).empty().removeClass('success error'); }, 5000);
+			}).fail(function (jqXHR) {
+				var msg = 'Oops! An error occurred and your message could not be sent.';
+				if (jqXHR.status === 405) {
+					msg = 'Backend not allowed (405). Configure EmailJS or deploy with PHP.';
+				}
+				$(formMessages).removeClass('success').addClass('error').text(msg);
+				setTimeout(function () { $(formMessages).empty().removeClass('error'); }, 7000);
+			}).always(function () {
+				submitBtn.prop('disabled', false).removeClass('disabled').html(originalBtnHtml);
+			});
+		}
+		// Start REST send
+		trySendWithEmailJS();
+		return;
 	});
 
 });

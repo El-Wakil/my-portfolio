@@ -123,6 +123,26 @@ The contact form now includes:
 To adjust validation rules, edit the logic block near `// Simple validation helpers` in `ajax-form.js`.
 
 ### Styling Success & Error Messages
+### EmailJS REST Mode
+The project now uses the EmailJS REST API directly instead of the browser SDK to avoid dependency ordering issues. The request payload is posted to:
+`https://api.emailjs.com/api/v1.0/email/send`
+
+Data shape:
+```jsonc
+{
+   "service_id": "<serviceId>",
+   "template_id": "<templateId>",
+   "public_key": "<publicKey>",
+   "template_params": {
+      "name": "...",
+      "email": "...",
+      "subject": "...",
+      "budget": "...",
+      "message": "..."
+   }
+}
+```
+If you revert to the SDK, re-add the CDN script before `ajax-form.js` and remove the REST fetch logic.
 
 Messages displayed in `.ajax-response` use classes:
 
