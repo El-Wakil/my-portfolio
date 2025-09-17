@@ -98,4 +98,22 @@
 		},]
 	});
 
+	// Mobile smooth scroll for call button (if target id exists on current page)
+	$(document).on('click', 'a.btn.btn-call[data-target-id]', function (e) {
+		var isMobile = window.matchMedia('(max-width: 767px)').matches;
+		if (!isMobile) return; // Only apply on mobile
+		var targetId = $(this).data('target-id');
+		var $target = $('#' + targetId);
+		if ($target.length) {
+			e.preventDefault();
+			// Close mobile menu if open
+			$('.mobile-menu-overlay').removeClass('show');
+			$('.navbar-main').removeClass('show');
+			// Smooth scroll
+			$('html, body').animate({
+				scrollTop: $target.offset().top - 70 // adjust for fixed header
+			}, 600);
+		}
+	});
+
 })(jQuery);
