@@ -98,4 +98,26 @@
 		},]
 	});
 
+	// Work experience loop duplication (make seamless ring if few items)
+	$(document).ready(function () {
+		$('.work-experiance-slider').each(function () {
+			const $ul = $(this);
+			const minItems = 6; // threshold to consider "not many"
+			let initialItems = $ul.children('li').length;
+			if (initialItems < minItems) {
+				// Clone existing items until we reach minItems
+				const originals = $ul.children('li').toArray();
+				let i = 0;
+				while ($ul.children('li').length < minItems) {
+					$ul.append($(originals[i % originals.length]).clone());
+					i++;
+				}
+				// Duplicate the (now filled) set once more for seamless looping
+				const filledCount = $ul.children('li').length;
+				$ul.append($ul.children('li').slice(0, filledCount).clone());
+				$ul.addClass('loop');
+			}
+		});
+	});
+
 })(jQuery);

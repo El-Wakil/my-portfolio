@@ -626,6 +626,26 @@ p {
   animation: scrollY 10s linear infinite;
 }
 
+/* When we have duplicated items for seamless loop */
+.work-experiance-card .work-experiance-slider.loop {
+  /* Longer list => adjust duration proportionally (basic heuristic) */
+  animation-duration: 18s;
+}
+
+/* Optional smoother loop if duplicated: move only half (original set) height */
+.work-experiance-card .work-experiance-slider.loop {
+  animation-name: scrollYLoop;
+}
+
+@keyframes scrollYLoop {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
 @keyframes scrollY {
   0% {
     transform: translateY(0);
@@ -654,7 +674,7 @@ p {
 }
 
 .work-experiance-card .work-experiance-slider li .date {
-  margin-right: 40px;
+  margin-right: 10px;
 }
 
 .work-experiance-card .work-experiance-slider li .date p {
