@@ -2416,6 +2416,17 @@ p {
   background-color: var(--dark-theme-black);
 }
 
+/* Make GitHub icon white in dark mode */
+.dark-theme
+  .content-box-card
+  .working-with-area
+  .working-with-main
+  .items
+  img[alt="Github"] {
+  filter: invert(1) brightness(1.2);
+  transition: filter 0.3s ease;
+}
+
 .dark-theme .content-box-card .client-feedback .feedback-item {
   background-color: var(--dark-theme-black);
 }
