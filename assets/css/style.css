@@ -26,6 +26,14 @@
 ===============================*/
 @import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&amp;display=swap");
 
+/*============================
+Custom Font
+*/
+@font-face {
+  font-family: Agustina;
+  src: url("../fonts/Agustina-Signature.otf") format("opentype");
+}
+
 /*=============================
 	01. Variable CSS start
 ===============================*/
@@ -944,10 +952,82 @@ p {
   animation: spin 10s linear infinite;
 }
 
+/* Circle below buttons on profile card (mobile) */
+@media (max-width: 600.98px) {
+  .profile-card .circle-area {
+    text-align: center;
+  }
+  .profile-card .circle-area .circle-text {
+    display: inline-block;
+  }
+}
+
 @keyframes spin {
   to {
     transform: translate(-50%, -50%) rotate(1turn);
   }
+}
+
+/* Overlay circle adaptation on profile card (home) */
+@media (max-width: 767.98px) {
+  .profile-card .text {
+    position: relative;
+  }
+  .profile-card .text .overlay-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(120%, 0%);
+    width: 70px;
+    height: 70px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .profile-card .text .overlay-circle .circle-text {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  .profile-card .text .overlay-circle .circle-text .circle-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90px;
+    height: 90px;
+    animation: spin 10s linear infinite;
+  }
+  .profile-card .text .overlay-circle .circle-text .arrow-down {
+    width: 70px;
+    height: 70px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  /* Elevate buttons above circle */
+  .profile-card .text .common-button-groups {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Dark theme swap for home overlay */
+.dark-theme .profile-card .text .overlay-circle .circle-text .circle-image {
+  display: none;
+}
+.dark-theme
+  .profile-card
+  .text
+  .overlay-circle
+  .circle-text
+  .circle-image.circle-image-light {
+  display: block !important;
 }
 
 .content-box-card .counter-area .circle-text .arrow-down {
