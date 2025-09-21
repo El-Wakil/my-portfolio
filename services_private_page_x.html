@@ -22,6 +22,18 @@
 </head>
 
 <body>
+  <script>
+    // Redirect to password gate if not unlocked
+    (function () {
+      try {
+        if (sessionStorage.getItem('services_unlocked') !== '1') {
+          window.location.replace('services-gate.html');
+        }
+      } catch (e) {
+        window.location.replace('services-gate.html');
+      }
+    })();
+  </script>
   <div id="page-content">
     <!-- header part start -->
     <header class="header-area">
@@ -65,7 +77,7 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link active" href="services.html">
+                  <a class="nav-link active" href="services-gate.html">
                     <svg class="nav-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7.99967 1.3335L1.33301 4.66683L7.99967 8.00016L14.6663 4.66683L7.99967 1.3335Z"
                         stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
@@ -817,176 +829,7 @@
   </div>
 
   <!-- JS here -->
-  <!-- Password Gate Overlay -->
-  <div id="services-password-gate" class="services-password-gate"
-    style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px;background:linear-gradient(145deg,rgba(10,12,20,.92),rgba(10,12,20,.88));backdrop-filter:blur(6px);font-family:inherit;">
-    <div class="spg-card"
-      style="width:100%;max-width:430px;background:var(--white,#fff);color:var(--black,#111);border-radius:28px;padding:40px 42px 46px;position:relative;box-shadow:0 18px 42px -8px rgba(0,0,0,.35);">
-      <h2 style="font-size:28px;font-weight:600;margin:0 0 6px;line-height:1.2;">Sorry! This page is under construction.
-      </h2>
-      <p style="margin:0 0 24px;font-size:15px;line-height:1.5;color:var(--light-black,#555);">This services page is
-        under construction. Enter the access password to continue.</p>
-      <form id="spg-form" autocomplete="off" style="display:flex;flex-direction:column;gap:18px;">
-        <div>
-          <label for="spg-password"
-            style="display:block;font-size:13px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;color:var(--light-black,#444);">Password</label>
-          <input id="spg-password" name="password" type="password" inputmode="text" autofocus required minlength="3"
-            style="width:100%;padding:14px 16px 14px 16px;border:2px solid #e2e6f0;background:var(--background,#f5f7fa);border-radius:14px;font-size:15px;font-weight:500;outline:none;transition:border .25s,background .25s;"
-            placeholder="Enter password" />
-          <div id="spg-error" style="display:none;margin-top:8px;font-size:13px;color:#d92e2e;font-weight:500;">
-            Incorrect password. Try again.</div>
-        </div>
-        <button type="submit"
-          style="background:#4770FF;color:#fff;border:none;border-radius:14px;padding:14px 20px;font-size:15px;font-weight:600;letter-spacing:.5px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 6px 16px -4px rgba(71,112,255,.5);transition:background .3s,transform .25s;">
-          Unlock Access
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4.16699 10H15.8337" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <path d="M10.833 15L15.833 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-              stroke-linejoin="round" />
-            <path d="M10.833 5L15.833 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
-        </button>
-        <button type="button" id="spg-cancel"
-          style="background:none;border:none;color:#6b7280;font-size:13px;font-weight:500;cursor:pointer;">Go
-          Back</button>
-      </form>
-      <div style="margin-top:28px;display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:#999;">
-        <span style="opacity:.7;">Protected Mode Active</span>
-        <span style="opacity:.7;">Session Locked</span>
-      </div>
-      <button id="spg-theme" type="button" aria-label="Toggle theme" role="switch" aria-checked="false"
-        style="position:absolute;top:12px;right:12px;background:var(--background,#f4f5f8);border:2px solid rgba(0,0,0,.06);width:44px;height:44px;border-radius:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .3s,border-color .3s,box-shadow .2s;outline:none;">
-        <span class="spg-icon-wrapper" style="position:relative;display:inline-flex;width:22px;height:22px;">
-          <!-- Sun Icon -->
-          <svg id="spg-icon-sun" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FD7E41"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            style="position:absolute;inset:0;opacity:1;transform:scale(1);transition:opacity .35s,transform .35s;transform-origin:50% 50%;">
-            <circle cx="12" cy="12" r="5"></circle>
-            <path
-              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-          </svg>
-          <!-- Moon Icon -->
-          <svg id="spg-icon-moon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f5f7fa"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            style="position:absolute;inset:0;opacity:0;transform:scale(.4) rotate(-25deg) translate(0,0);transition:opacity .4s,transform .45s;transform-origin:50% 50%;">
-            <path d="M21 12.79A9 9 0 0 1 11.21 3 7 7 0 1 0 21 12.79Z" />
-          </svg>
-        </span>
-      </button>
-    </div>
-  </div>
-  <script>
-    (function () {
-      const HASH_HEX = '22548d992ab2bbbe7f04168572b9cf849870b0d176f580bbd0c7b182ade50b4c'; 
-      const OBF = [
-        80, 113, 108, 112, 111, 108, 102, 72, 72, 116, 115, 61, 55, 58 // Will be replaced with real mapping
-      ];
-      // Reconstruct plaintext (only held in local scope until hash compare) then immediately zeroed.
-      function deobfuscate(arr) {
-        const offsets = [3, 5, 7];
-        return arr.map((v, i) => String.fromCharCode(v - offsets[i % offsets.length])).join('');
-      }
-      async function sha256Hex(str) {
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-      }
-      const gate = document.getElementById('services-password-gate');
-      const form = document.getElementById('spg-form');
-      const input = document.getElementById('spg-password');
-      const errorBox = document.getElementById('spg-error');
-      const cancelBtn = document.getElementById('spg-cancel');
-      const themeBtn = document.getElementById('spg-theme');
-      const sunIcon = document.getElementById('spg-icon-sun');
-      const moonIcon = document.getElementById('spg-icon-moon');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      let dark = prefersDark || document.body.classList.contains('dark-theme');
-
-      function applyGateTheme() {
-        const card = gate.querySelector('.spg-card');
-        if (dark) {
-          card.style.background = 'linear-gradient(160deg,#0f141d,#121a27)';
-          card.style.color = 'var(--dark-theme-white,#f5f7fa)';
-          gate.style.background = 'linear-gradient(145deg,rgba(4,6,10,.94),rgba(4,6,10,.9))';
-          themeBtn.style.background = 'rgba(255,255,255,0.08)';
-          themeBtn.style.borderColor = 'rgba(255,255,255,0.12)';
-          themeBtn.setAttribute('aria-checked', 'true');
-          // Icon transitions
-          sunIcon.style.opacity = '0';
-          sunIcon.style.transform = 'scale(.4) rotate(35deg)';
-          moonIcon.style.opacity = '1';
-          moonIcon.style.transform = 'scale(1) rotate(0deg) translate(0,0)';
-        } else {
-          card.style.background = 'var(--white,#fff)';
-          card.style.color = 'var(--black,#111)';
-          gate.style.background = 'linear-gradient(145deg,rgba(10,12,20,.92),rgba(10,12,20,.88))';
-          themeBtn.style.background = 'var(--background,#f4f5f8)';
-          themeBtn.style.borderColor = 'rgba(0,0,0,.06)';
-          themeBtn.setAttribute('aria-checked', 'false');
-          sunIcon.style.opacity = '1';
-          sunIcon.style.transform = 'scale(1) rotate(0deg) translate(0,0)';
-          moonIcon.style.opacity = '0';
-          moonIcon.style.transform = 'scale(.4) rotate(-25deg) translate(0,0)';
-        }
-      }
-      applyGateTheme();
-      themeBtn.addEventListener('click', () => { dark = !dark; applyGateTheme(); });
-      themeBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); themeBtn.click(); } });
-      themeBtn.addEventListener('focus', () => { themeBtn.style.boxShadow = '0 0 0 3px rgba(71,112,255,.45)'; });
-      themeBtn.addEventListener('blur', () => { themeBtn.style.boxShadow = 'none'; });
-
-      // Always require password: no persistence (removed localStorage logic)
-
-      function deny() {
-        errorBox.style.display = 'block';
-        input.setAttribute('aria-invalid', 'true');
-        input.focus();
-        input.select();
-      }
-
-      form.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const val = input.value.trim();
-        if (!val) return deny();
-        try {
-          // Compute hash of entered value
-          const enteredHash = await sha256Hex(val);
-          if (!window.__SPG_HASH_READY) {
-            // Prepare stored hash (already hex string)
-            window.__SPG_HASH_READY = HASH_HEX.toLowerCase();
-          }
-          if (enteredHash === window.__SPG_HASH_READY) {
-            gate.style.opacity = '0';
-            gate.style.transition = 'opacity .45s ease';
-            setTimeout(() => gate.remove(), 450);
-          } else {
-            deny();
-          }
-        } catch (err) {
-          console.error('Hash compare failed', err);
-          deny();
-        } finally {
-          // Best-effort wipe of local variables
-          for (let i = 0; i < val.length; i++) { /* no-op to hint GC */ }
-        }
-      });
-
-      cancelBtn.addEventListener('click', function () {
-        // Navigate back to previous page or home if none
-        if (document.referrer) { history.back(); } else { window.location.href = 'index.html'; }
-      });
-
-      // Basic brute-force mitigation: lock after 5 failed attempts
-      let attempts = 0;
-      input.addEventListener('keydown', () => { if (errorBox.style.display === 'block') errorBox.style.display = 'none'; });
-      form.addEventListener('submit', () => { attempts++; if (attempts > 5) { errorBox.textContent = 'Too many attempts. Refresh later.'; input.disabled = true; } });
-
-      // Handle bfcache restore (Safari/Firefox) so overlay reappears if user navigates away/back.
-      window.addEventListener('pageshow', (e) => { if (e.persisted) { location.reload(); } });
-
-    })();
-  </script>
+  <!-- Services page now relies on external gate (services-gate.html). -->
   <script src="assets/js/vendor/jquery-3.6.0.min.js"></script>
   <script src="assets/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/jquery.magnific-popup.min.js"></script>
